@@ -41,10 +41,10 @@ using ::android::hardware::camera::common::V1_0::arc::ImageProcessor;
 using ::android::hardware::camera::common::V1_0::v4l2::PixelFormat;
 using ::android::hardware::graphics::common::V1_0::BufferUsage;
 
-#define REQ_FMQ_SIZE_PROPERTY "ro.camera.req.fmq.size"
+#define REQ_FMQ_SIZE_PROPERTY "ro.vendor.camera.req.fmq.size"
 #define CAMERA_REQUEST_METADATA_QUEUE_SIZE (1 << 20) /* 1MB */
 
-#define RES_FMQ_SIZE_PROPERTY "ro.camera.res.fmq.size"
+#define RES_FMQ_SIZE_PROPERTY "ro.vendor.camera.res.fmq.size"
 #define CAMERA_RESULT_METADATA_QUEUE_SIZE (1 << 20) /* 1MB */
 
 #define CAMERA_SYNC_TIMEOUT 5000
