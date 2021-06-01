@@ -101,6 +101,18 @@ int V4L2Wrapper::Connect() {
   // by disabling cameras that get disconnected and checking newly connected
   // cameras, so Connect() is never called on an unsupported camera)
 
+  /* Set camera frame rate to 15fps to ensure preview stability */
+  v4l2_streamparm parm;
+  memset(&parm, 0, sizeof(parm));
+
+  parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  parm.parm.capture.timeperframe.numerator = 1000;
+  parm.parm.capture.timeperframe.denominator =
+    static_cast<uint32_t>(15 * parm.parm.capture.timeperframe.numerator);
+
+  if (ioctlLocked(VIDIOC_S_PARM, &parm) < 0) {
+    ALOGE("%s: S_PARM fails: %s", __FUNCTION__, strerror(errno));
+  }
 
   return 0;
 }
