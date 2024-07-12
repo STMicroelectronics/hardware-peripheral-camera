@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mpu"
 // #define LOG_NDEBUG 0
 
 #include "image_processor.h"
@@ -44,7 +44,8 @@ namespace arc {
  * -----------------------------------------------------------------------------
  * HAL_PIXEL_FORMAT_YV12         = V4L2_PIX_FMT_YVU420 = FOURCC_YV12
  * HAL_PIXEL_FORMAT_YCrCb_420_SP = V4L2_PIX_FMT_NV21   = FOURCC_NV21
- * HAL_PIXEL_FORMAT_RGBA_8888    = V4L2_PIX_FMT_RGB32  = FOURCC_BGR4
+ * HAL_PIXEL_FORMAT_RGBA_8888    = V4L2_PIX_FMT_ABGR32 = FOURCC_AR24
+ *                                 V4L2_PIX_FMT_BGR32  = FOURCC_BGR4
  * HAL_PIXEL_FORMAT_YCbCr_422_I  = V4L2_PIX_FMT_YUYV   = FOURCC_YUYV
  *                                                     = FOURCC_YUY2
  *                                 V4L2_PIX_FMT_YUV420 = FOURCC_I420
@@ -91,9 +92,11 @@ size_t ImageProcessor::GetConvertedSize(int fourcc, uint32_t width,
     // Fall-through.
     case V4L2_PIX_FMT_NV21:  // NV21
       return width * height * 3 / 2;
-    case V4L2_PIX_FMT_BGR32:
-    case V4L2_PIX_FMT_RGB32:
+    case V4L2_PIX_FMT_ABGR32:
+    case V4L2_PIX_FMT_ARGB32:
       return width * height * 4;
+    case V4L2_PIX_FMT_RGB565:
+      return width * height * 2;
     default:
       ALOGI("%s: Pixel format %s is unsupported",
                                   __FUNCTION__, FormatToString(fourcc).c_str());
@@ -133,7 +136,7 @@ bool ImageProcessor::SupportsConversion(uint32_t from_fourcc,
       return (
           to_fourcc == V4L2_PIX_FMT_YUV420 ||
           to_fourcc == V4L2_PIX_FMT_YVU420 || to_fourcc == V4L2_PIX_FMT_NV21 ||
-          to_fourcc == V4L2_PIX_FMT_RGB32 || to_fourcc == V4L2_PIX_FMT_BGR32 ||
+          to_fourcc == V4L2_PIX_FMT_ARGB32 || to_fourcc == V4L2_PIX_FMT_ABGR32 ||
           to_fourcc == V4L2_PIX_FMT_JPEG);
     case V4L2_PIX_FMT_MJPEG:
       return (to_fourcc == V4L2_PIX_FMT_YUV420);
@@ -222,7 +225,7 @@ int ImageProcessor::ConvertFormat(const CameraMetadata& metadata,
         ALOGE_IF(res, "%s: YU12ToNV21() returns %d", __FUNCTION__, res);
         return res ? -EINVAL : 0;
       }
-      case V4L2_PIX_FMT_BGR32: {
+      case V4L2_PIX_FMT_ABGR32: {
         int res = libyuv::I420ToABGR(
             in_frame.GetData(),  /* src_y */
             in_frame.GetWidth(), /* src_stride_y */
@@ -238,7 +241,7 @@ int ImageProcessor::ConvertFormat(const CameraMetadata& metadata,
         ALOGE_IF(res, "%s: I420ToABGR() returns %d", __FUNCTION__, res);
         return res ? -EINVAL : 0;
       }
-      case V4L2_PIX_FMT_RGB32: {
+      case V4L2_PIX_FMT_ARGB32: {
         int res = libyuv::I420ToARGB(
             in_frame.GetData(),  /* src_y */
             in_frame.GetWidth(), /* src_stride_y */

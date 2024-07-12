@@ -21,12 +21,12 @@
 #include <stdint.h>
 
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include <android-base/unique_fd.h>
 #include <hardware/gralloc.h>
 #include <helper/mapper_helper.h>
-#include <utils/Mutex.h>
 
 namespace android {
 namespace hardware {
@@ -119,7 +119,7 @@ class V4L2FrameBuffer : public FrameBuffer {
   bool is_mapped_;
 
   // Lock to guard |is_mapped_|.
-  Mutex lock_;
+  std::mutex lock_;
 };
 
 // GrallocFrameBuffer is used for the buffer from Android framework. Uses
@@ -147,7 +147,7 @@ class GrallocFrameBuffer : public FrameBuffer {
   bool is_mapped_;
 
   // Lock to guard |is_mapped_|.
-  Mutex lock_;
+  std::mutex lock_;
 
   // Camera stream and device buffer context.
   uint32_t device_buffer_length_;

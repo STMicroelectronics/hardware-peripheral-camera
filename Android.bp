@@ -1,6 +1,36 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2024 STMicroelectronics
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package {
+    default_applicable_licenses: ["hardware_camera_license"],
+}
+
+license {
+    name: "hardware_camera_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "LICENSE",
+    ],
+}
 
 cc_library_static {
-    name: "android.hardware.camera.common@1.0-arc.stm32mp1",
+    name: "android.hardware.camera.common@1.0-arc.stm32mpu",
     srcs: [
         "common/arc/cached_frame.cpp",
         "common/arc/exif_utils.cpp",
@@ -21,11 +51,10 @@ cc_library_static {
         "libexif",
         "libhardware",
         "libjpeg",
-        "libutils",
     ],
     static_libs: [
         "android.hardware.camera.common@1.0-helper",
-        "android.hardware.camera.common@1.0-helper.stm32mp1",
+        "android.hardware.camera.common@1.0-helper.stm32mpu",
         "android.hardware.graphics.mapper@2.0",
         "libyuv_static",
     ],
@@ -39,7 +68,7 @@ cc_library_static {
 }
 
 cc_library_static {
-    name: "android.hardware.camera.common@1.0-v4l2.stm32mp1",
+    name: "android.hardware.camera.common@1.0-v4l2.stm32mpu",
     srcs: [
         "common/v4l2/v4l2_wrapper.cpp",
         "common/v4l2/stream_format.cpp",
@@ -50,9 +79,9 @@ cc_library_static {
         "-Wall",
     ],
     shared_libs: [
+        "android.hardware.graphics.common-V3-ndk",
         "libbase",
         "libutils",
-        "android.hardware.graphics.common@1.0"
     ],
     local_include_dirs: [
         "common/v4l2/include/v4l2",
@@ -64,7 +93,7 @@ cc_library_static {
 }
 
 cc_library_static {
-    name: "android.hardware.camera.common@1.0-helper.stm32mp1",
+    name: "android.hardware.camera.common@1.0-helper.stm32mpu",
     srcs: [
         "common/helper/mapper_helper.cpp",
     ],
@@ -76,7 +105,6 @@ cc_library_static {
     shared_libs: [
         "libcamera_metadata",
         "libhidlbase",
-        "libutils",
         "android.hardware.graphics.mapper@2.0",
     ],
     static_libs: [
@@ -92,7 +120,7 @@ cc_library_static {
 }
 
 cc_library_static {
-    name: "android.hardware.camera.common@1.0-metadata.stm32mp1",
+    name: "android.hardware.camera.common@1.0-metadata.stm32mpu",
     srcs: [
         "common/metadata/boottime_state_delegate.cpp",
         "common/metadata/enum_converter.cpp",
@@ -112,7 +140,6 @@ cc_library_static {
         "libjpeg",
         "libhardware",
         "libutils",
-        "android.hardware.graphics.common@1.0",
     ],
     static_libs: [
         /* Use CameraMetadata helper from hardware/interface */
@@ -127,18 +154,13 @@ cc_library_static {
     vendor_available: true,
 }
 
-cc_binary {
-    name: "android.hardware.camera.provider@2.4-service.stm32mp1",
-    relative_install_path: "hw",
-    init_rc: ["provider/android.hardware.camera.provider@2.4-service.stm32mp1.rc"],
+cc_library_static {
+    name: "android.hardware.camera.common@1.0-parser.stm32mpu",
     srcs: [
-        "device/3.2/camera_device.cpp",
-        "device/3.2/camera_device_session.cpp",
-        "device/3.2/camera_tracker.cpp",
-        "device/3.2/metadata_factory.cpp",
-        "device/3.2/static_properties.cpp",
-        "provider/camera_provider.cpp",
-        "provider/service.cpp",
+        "common/parser/parser_utils.cpp",
+        "common/parser/enum_parser.cpp",
+        "common/parser/metadata_visitor.cpp",
+        "common/parser/metadata_factory.cpp",
     ],
     cflags: [
         "-Werror",
@@ -146,36 +168,76 @@ cc_binary {
         "-Wall",
     ],
     shared_libs: [
-        "libbase",
-        "libcamera_metadata",
-        "libcutils",
-        "libexif",
-        "libfmq",
-        "libhardware",
-        "libhidlbase",
-        "libjpeg",
+        "android.hardware.graphics.common-V3-ndk",
+        "android.hardware.camera.device-V1-ndk",
         "liblog",
-        "libsync",
+        "libtinyxml2",
+        "libcamera_metadata",
         "libutils",
-        "android.hardware.camera.common@1.0",
-        "android.hardware.camera.device@1.0",
-        "android.hardware.camera.device@3.2",
-        "android.hardware.camera.device@3.3",
-        "android.hardware.camera.device@3.4",
-        "android.hardware.camera.provider@2.4",
-        "android.hardware.graphics.mapper@2.0",
     ],
     static_libs: [
-        "android.hardware.camera.common@1.0-arc.stm32mp1",
-        "android.hardware.camera.common@1.0-v4l2.stm32mp1",
-        "android.hardware.camera.common@1.0-helper.stm32mp1",
         "android.hardware.camera.common@1.0-helper",
-        "android.hardware.camera.common@1.0-metadata.stm32mp1",
-        "libyuv_static",
+        "android.hardware.camera.common@1.0-metadata.stm32mpu",
+        "android.hardware.camera.common@1.0-v4l2.stm32mpu",
     ],
     local_include_dirs: [
-        "device/3.2/include",
+        "common/parser/include/parser",
+    ],
+    export_include_dirs: [
+        "common/parser/include",
+    ],
+    vendor_available: true,
+}
+
+cc_binary {
+    name: "android.hardware.camera.provider-service.stm32mpu",
+    relative_install_path: "hw",
+    init_rc: ["provider/android.hardware.camera.provider-service.stm32mpu.rc"],
+    vintf_fragments: ["provider/android.hardware.camera.provider-service.stm32mpu.xml"],
+    srcs: [
+        "provider/service.cpp",
+        "provider/v4l2_camera_provider.cpp",
+        "device/aidl/v4l2_camera_device.cpp",
+        "device/aidl/v4l2_camera_device_session.cpp",
+        "device/aidl/v4l2_stream.cpp",
+        "device/aidl/static_properties.cpp",
+    ],
+    cflags: [
+        "-Werror",
+        "-Wextra",
+        "-Wall",
+    ],
+    shared_libs: [
+        "android.hardware.camera.device-V1-ndk",
+        "android.hardware.camera.provider-V1-ndk",
+        "android.hardware.graphics.mapper@2.0",
+        "libfmq",
+        "liblog",
+        "libexif",
+        "libjpeg",
+        "libutils",
+        "libcutils",
+        "libbinder",
+        "libhardware",
+        "libtinyxml2",
+        "libhidlbase",
+        "libbinder_ndk",
+        "libcamera_metadata",
+        "libisp",
+    ],
+    static_libs: [
+        "android.hardware.camera.common@1.0-arc.stm32mpu",
+        "android.hardware.camera.common@1.0-v4l2.stm32mpu",
+        "android.hardware.camera.common@1.0-helper.stm32mpu",
+        "android.hardware.camera.common@1.0-helper",
+        "android.hardware.camera.common@1.0-metadata.stm32mpu",
+        "android.hardware.camera.common@1.0-parser.stm32mpu",
+        "libyuv_static",
+        "libaidlcommonsupport",
+    ],
+    local_include_dirs: [
         "provider/include",
+        "device/aidl/include",
     ],
     proprietary: true,
 }

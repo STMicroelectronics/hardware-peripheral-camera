@@ -251,7 +251,7 @@ int MetadataCommon::SingleTagValue(const helper::CameraMetadata& metadata,
   } else if (entry.count != 1) {
     ALOGE(
         "%s: Error: expected metadata tag %d to contain exactly 1 value "
-        "(had %d).",
+        "(had %zu).",
         __FUNCTION__,
         tag,
         entry.count);
@@ -282,7 +282,7 @@ int MetadataCommon::SingleTagValue(const helper::CameraMetadata& metadata,
   } else if (entry.count != N) {
     ALOGE(
         "%s: Error: expected metadata tag %d to contain a single array of "
-        "exactly %d values (had %d).",
+        "exactly %zu values (had %zu).",
         __FUNCTION__,
         tag,
         N,
@@ -356,7 +356,7 @@ int MetadataCommon::VectorTagValue(const helper::CameraMetadata& metadata,
   if (entry.count % N != 0) {
     ALOGE(
         "%s: Error: expected metadata tag %d to contain a vector of arrays of "
-        "length %d (had %d entries, which is not divisible by %d).",
+        "length %zu (had %zu entries, which is not divisible by %zu).",
         __FUNCTION__,
         tag,
         N,

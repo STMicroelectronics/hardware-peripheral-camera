@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mpu"
 // #define LOG_NDEBUG 0
 
 #include "utils/Log.h"
@@ -47,7 +47,7 @@ FrameBuffer::~FrameBuffer() {}
 
 int FrameBuffer::SetDataSize(size_t data_size) {
   if (data_size > buffer_size_) {
-    ALOGE("%s: Buffer overflow: Buffer only has %d, but data needs %d",
+    ALOGE("%s: Buffer overflow: Buffer only has %zu, but data needs %zu",
               __FUNCTION__, buffer_size_, data_size);
     return -EINVAL;
   }
@@ -98,7 +98,7 @@ V4L2FrameBuffer::~V4L2FrameBuffer() {
 }
 
 int V4L2FrameBuffer::Map() {
-  Mutex::Autolock l(lock_);
+  std::lock_guard l(lock_);
 
   if (is_mapped_) {
     ALOGE("%s: The buffer is already mapped", __FUNCTION__);
@@ -119,7 +119,7 @@ int V4L2FrameBuffer::Map() {
 }
 
 int V4L2FrameBuffer::Unmap() {
-  Mutex::Autolock l(lock_);
+  std::lock_guard l(lock_);
 
   if (is_mapped_ && munmap(data_, buffer_size_)) {
     ALOGE("%s: mummap() failed: %s", __FUNCTION__, strerror(errno));
@@ -153,7 +153,7 @@ GrallocFrameBuffer::~GrallocFrameBuffer() {
 }
 
 int GrallocFrameBuffer::Map(hidl_handle acquire_fence) {
-  Mutex::Autolock l(lock_);
+  std::lock_guard l(lock_);
 
   ALOGV("%s: enter", __FUNCTION__);
 
@@ -178,8 +178,10 @@ int GrallocFrameBuffer::Map(hidl_handle acquire_fence) {
       addr = mapper_->lock(buffer_, stream_usage_, device_buffer_length_, 1,
                            acquire_fence);
       break;
-    case V4L2_PIX_FMT_BGR32:
-    case V4L2_PIX_FMT_RGB32:
+    case V4L2_PIX_FMT_ABGR32:
+    case V4L2_PIX_FMT_ARGB32:
+    case V4L2_PIX_FMT_RGB24:
+    case V4L2_PIX_FMT_RGB565:
       addr = mapper_->lock(buffer_, stream_usage_, width_, height_,
                            acquire_fence);
       break;
@@ -195,11 +197,11 @@ int GrallocFrameBuffer::Map(hidl_handle acquire_fence) {
   data_ = static_cast<uint8_t*>(addr);
 
   if (fourcc_ == V4L2_PIX_FMT_YVU420 || fourcc_ == V4L2_PIX_FMT_YUV420 ||
-      fourcc_ == V4L2_PIX_FMT_NV21 || fourcc_ == V4L2_PIX_FMT_RGB32 ||
-      fourcc_ == V4L2_PIX_FMT_BGR32) {
+      fourcc_ == V4L2_PIX_FMT_NV21 || fourcc_ == V4L2_PIX_FMT_ARGB32 ||
+      fourcc_ == V4L2_PIX_FMT_ABGR32 || fourcc_ == V4L2_PIX_FMT_RGB565) {
     buffer_size_ = ImageProcessor::GetConvertedSize(fourcc_, width_, height_);
 
-    ALOGV("%s: calculated converted size: %d", __FUNCTION__, buffer_size_);
+    ALOGV("%s: calculated converted size: %zu", __FUNCTION__, buffer_size_);
   }
 
   is_mapped_ = true;
@@ -214,7 +216,7 @@ int GrallocFrameBuffer::Map() {
 }
 
 int GrallocFrameBuffer::Unmap(hidl_handle *release_fence) {
-  Mutex::Autolock l(lock_);
+  std::lock_guard l(lock_);
 
   if (is_mapped_) {
    int res = mapper_->unlock(buffer_, release_fence);

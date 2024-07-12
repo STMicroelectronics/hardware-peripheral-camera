@@ -19,9 +19,9 @@
 #define V4L2_CAMERA_HAL_V4L2_WRAPPER_H_
 
 #include <android-base/unique_fd.h>
+#include <mutex>
 #include <set>
 #include <string>
-#include <utils/Mutex.h>
 
 #include "stream_format.h"
 
@@ -123,9 +123,9 @@ private:
   /* The format this device is set up for. */
   std::shared_ptr<StreamFormat> format_;
   /* Lock protecting use of the device. */
-  Mutex device_lock_;
+  std::mutex device_lock_;
   /* Lock protecting connecting/disconnecting the device. */
-  Mutex connection_lock_;
+  std::mutex connection_lock_;
   /* Reference count connections. */
   int connection_count_;
 

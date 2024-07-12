@@ -15,19 +15,24 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.device@3.2-metadata.stm32mp1"
+#define LOG_TAG "android.hardware.camera.device@1.1-metadata.stm32mpu"
 // #define LOG_NDEBUG 0
 
-#include <utils/Log.h>
-
 #include "static_properties.h"
+
+#include <aidl/android/hardware/camera/device/StreamType.h>
+#include <aidl/android/hardware/camera/device/StreamConfigurationMode.h>
+
+#include <utils/Log.h>
 
 namespace android {
 namespace hardware {
 namespace camera {
 namespace device {
-namespace V3_2 {
 namespace implementation {
+
+using aidl::android::hardware::camera::device::StreamType;
+using aidl::android::hardware::camera::device::StreamConfigurationMode;
 
 using ::android::hardware::camera::common::V1_0::metadata::StreamStallDuration;
 using StreamConfig =
@@ -156,12 +161,16 @@ StaticProperties* StaticProperties::NewStaticProperties(
   std::set<uint8_t> request_capabilities;
   std::vector<StreamConfig> configs;
   std::vector<StreamStallDuration> stalls;
+  std::vector<int64_t> available_use_cases;
+  std::vector<uint8_t> available_rotations;
   CapabilitiesMap stream_capabilities;
   ReprocessFormatMap reprocess_map;
 
   // If reading any data returns an error, something is wrong.
   if (metadata_reader->Facing(&facing) ||
       metadata_reader->Orientation(&orientation) ||
+      metadata_reader->AvailableUseCases(&available_use_cases) ||
+      metadata_reader->AvailableRotation(&available_rotations) ||
       metadata_reader->MaxInputStreams(&max_input_streams) ||
       metadata_reader->MaxOutputStreams(&max_raw_output_streams,
                                         &max_non_stalling_output_streams,
@@ -185,6 +194,8 @@ StaticProperties* StaticProperties::NewStaticProperties(
   return new StaticProperties(std::move(metadata_reader),
                               facing,
                               orientation,
+                              available_use_cases,
+                              available_rotations,
                               max_input_streams,
                               max_raw_output_streams,
                               max_non_stalling_output_streams,
@@ -198,6 +209,8 @@ StaticProperties::StaticProperties(
     std::unique_ptr<const MetadataReader> metadata_reader,
     int facing,
     int orientation,
+    const std::vector<int64_t> &available_use_cases,
+    const std::vector<uint8_t> &available_rotations,
     int32_t max_input_streams,
     int32_t max_raw_output_streams,
     int32_t max_non_stalling_output_streams,
@@ -208,6 +221,8 @@ StaticProperties::StaticProperties(
     : metadata_reader_(std::move(metadata_reader)),
       facing_(facing),
       orientation_(orientation),
+      available_use_cases_(available_use_cases),
+      available_rotations_(available_rotations),
       max_input_streams_(max_input_streams),
       max_raw_output_streams_(max_raw_output_streams),
       max_non_stalling_output_streams_(max_non_stalling_output_streams),
@@ -279,8 +294,21 @@ bool StaticProperties::SanityCheckStreamConfiguration(
 
     if (!IsInputType(stream.streamType) &&
                !IsOutputType(stream.streamType)) {
-      ALOGE("%s: Stream %d type %d is neither an input nor an output type",
+      ALOGE("%s: Stream %zu type %d is neither an input nor an output type",
                                             __func__, i, stream.streamType);
+      return false;
+    }
+
+    if (std::find(available_use_cases_.cbegin(), available_use_cases_.cend(),
+                  static_cast<int64_t>(stream.useCase)) ==
+        available_use_cases_.cend()) {
+      ALOGE("%s: %ld use case is not supported", __func__, stream.useCase);
+      return false;
+    }
+    if (std::find(available_rotations_.cbegin(), available_rotations_.cend(),
+                  static_cast<int8_t>(stream.rotation)) ==
+        available_rotations_.cend()) {
+      ALOGE("%s: %d rotation is not supported", __func__, stream.rotation);
       return false;
     }
   }
@@ -486,7 +514,6 @@ bool StaticProperties::ReprocessingSupported(
 }
 
 } // namespace implementation
-} // namespace V3_2
 } // namespace device
 } // namespace camera
 } // namespace hardware

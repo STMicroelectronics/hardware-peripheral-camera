@@ -1,4 +1,0 @@
-service vendor.cameraprovider-hal-2-4 /vendor/bin/hw/android.hardware.camera.provider@2.4-service.stm32mp1
-    class hal
-    user system
-    group system

@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <vector>
 
-#include "android/hardware/graphics/common/1.0/types.h"
+#include <aidl/android/hardware/graphics/common/PixelFormat.h>
 
 namespace android {
 namespace hardware {
@@ -32,7 +32,7 @@ namespace common {
 namespace V1_0 {
 namespace v4l2 {
 
-using ::android::hardware::graphics::common::V1_0::PixelFormat;
+using ::aidl::android::hardware::graphics::common::PixelFormat;
 
 class StreamFormat;
 

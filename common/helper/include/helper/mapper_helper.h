@@ -18,9 +18,10 @@
 #ifndef CAMERA_COMMON_1_0_HANDLEIMPORTED_H
 #define CAMERA_COMMON_1_0_HANDLEIMPORTED_H
 
-#include <utils/Mutex.h>
 #include <android/hardware/graphics/mapper/2.0/IMapper.h>
 #include <cutils/native_handle.h>
+
+#include <mutex>
 
 using android::hardware::graphics::mapper::V2_0::IMapper;
 using android::hardware::graphics::mapper::V2_0::YCbCrLayout;
@@ -58,7 +59,7 @@ private:
     void initializeLocked();
     void cleanup();
 
-    Mutex mLock;
+    std::mutex mLock;
     bool initialized__;
     sp<IMapper> mapper_;
 

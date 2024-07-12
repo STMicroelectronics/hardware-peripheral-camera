@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.common@1.0-v4l2.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-v4l2.stm32mpu"
 // #define LOG_NDEBUG 0
 
 #include <utils/Log.h>
@@ -76,14 +76,23 @@ int StreamFormat::V4L2ToHalPixelFormat(uint32_t v4l2_pixel_format) {
 
   // Translate V4L2 format to HAL format.
   switch (v4l2_pixel_format) {
-    case V4L2_PIX_FMT_BGR32:
+    case V4L2_PIX_FMT_ABGR32:
       res = PixelFormat::RGBA_8888;
+      break;
+    case V4L2_PIX_FMT_RGB24:
+      res = PixelFormat::RGB_888;
+      break;
+    case V4L2_PIX_FMT_RGB565:
+      res = PixelFormat::RGB_565;
       break;
     case V4L2_PIX_FMT_JPEG:
       res = PixelFormat::BLOB;
       break;
     case V4L2_PIX_FMT_NV21:
       res = PixelFormat::YCRCB_420_SP;
+      break;
+    case V4L2_PIX_FMT_NV16:
+      res = PixelFormat::YCBCR_422_SP;
       break;
     case V4L2_PIX_FMT_YUV420:
       res = PixelFormat::YCBCR_420_888;
@@ -96,7 +105,7 @@ int StreamFormat::V4L2ToHalPixelFormat(uint32_t v4l2_pixel_format) {
       break;
     default:
       // Unrecognized format.
-      ALOGV("Unrecognized v4l2 pixel format 0x%x", v4l2_pixel_format);
+      ALOGV("Unrecognized v4l2 pixel format 0x%x (or no PixelFormat associated)", v4l2_pixel_format);
       return -1;
   }
 
@@ -111,7 +120,9 @@ uint32_t StreamFormat::HalToV4L2PixelFormat(PixelFormat hal_pixel_format,
     case PixelFormat::IMPLEMENTATION_DEFINED:
       return implementation_defined;
     case PixelFormat::RGBA_8888:
-      return V4L2_PIX_FMT_BGR32;
+      return V4L2_PIX_FMT_ABGR32;
+   case PixelFormat::RGB_888:
+      return V4L2_PIX_FMT_RGB24;
     case PixelFormat::YCBCR_420_888:
       // This is a flexible YUV format that depends on platform. Different
       // platform may have different format. It can be YVU420 or NV12. Now we
@@ -122,8 +133,12 @@ uint32_t StreamFormat::HalToV4L2PixelFormat(PixelFormat hal_pixel_format,
       return V4L2_PIX_FMT_YUYV;
     case PixelFormat::YCRCB_420_SP:
       return V4L2_PIX_FMT_NV21;
+    case PixelFormat::YCBCR_422_SP:
+      return V4L2_PIX_FMT_NV16;
     case PixelFormat::YV12:
       return V4L2_PIX_FMT_YVU420;
+    case PixelFormat::RGB_565:
+      return V4L2_PIX_FMT_RGB565;
     default:
       ALOGV("Pixel format 0x%x is unsupported.", hal_pixel_format);
       break;

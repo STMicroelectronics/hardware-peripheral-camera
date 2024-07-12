@@ -17,7 +17,7 @@
 
 #include "exif_utils.h"
 
-#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mpu"
 // #define LOG_NDEBUG 0
 #include <utils/Log.h>
 

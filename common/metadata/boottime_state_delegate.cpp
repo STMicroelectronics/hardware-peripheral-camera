@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.common@1.0-metadata.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-metadata.stm32mpu"
 // #define LOG_NDEBUG 0
-//
+
 #include <utils/Log.h>
 
 #include <errno.h>
@@ -43,6 +43,8 @@ int BoottimeStateDelegate::GetValue(int64_t* value) {
     return -errno;
   }
   *value = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
+  ALOGV("%s: Boottime: %ld", __func__, *value);
 
   return 0;
 }

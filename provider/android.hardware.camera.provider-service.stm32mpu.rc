@@ -1,0 +1,6 @@
+service vendor.camera.provider.stm32mpu /vendor/bin/hw/android.hardware.camera.provider-service.stm32mpu
+    interface aidl android.hardware.camera.provider.ICameraProvider/internal/0
+    class hal
+    user cameraserver
+    group system media camera
+    capabilities SYS_NICE

@@ -18,7 +18,7 @@
 #ifndef V4L2_CAMERA_HAL_METADATA_MAP_CONVERTER_H_
 #define V4L2_CAMERA_HAL_METADATA_MAP_CONVERTER_H_
 
-#define LOG_TAG "android.hardware.camera.common@1.0-metadata.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-metadata.stm32mpu"
 // #define LOG_NDEBUG 0
 
 #include <errno.h>

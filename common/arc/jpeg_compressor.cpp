@@ -17,7 +17,7 @@
 
 #include "jpeg_compressor.h"
 
-#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-arc.stm32mpu"
 // #define LOG_NDEBUG 0
 #include <utils/Log.h>
 
@@ -54,7 +54,7 @@ bool JpegCompressor::CompressImage(const void* image, int width, int height,
   if (!Encode(image, width, height, quality, app1Buffer, app1Size)) {
     return false;
   }
-  ALOGV("%s: Compressed JPEG: %d [%dx%d] -> %d bytes",
+  ALOGV("%s: Compressed JPEG: %d [%dx%d] -> %zu bytes",
             __FUNCTION__, (width * height * 12) / 8, width,
             height, result_buffer_.size());
   return true;

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.common@1.0-metadata.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-metadata.stm32mpu"
 // #define LOG_NDEBUG 0
 
 #include <utils/Log.h>
@@ -121,6 +121,34 @@ int MetadataReader::MaxOutputStreams(int32_t* max_raw,
   *max_raw = max_output_streams[0];
   *max_non_stalling = max_output_streams[1];
   *max_stalling = max_output_streams[2];
+
+  return 0;
+}
+
+int MetadataReader::AvailableUseCases(std::vector<int64_t> *use_cases) const {
+  int res = MetadataCommon::VectorTagValue(*metadata_,
+                                      ANDROID_SCALER_AVAILABLE_STREAM_USE_CASES,
+                                      use_cases);
+
+  if (res) {
+    ALOGE("%s: Failed to get available stream use cases from static metadata.",
+          __func__);
+    return res;
+  }
+
+  return 0;
+}
+
+int MetadataReader::AvailableRotation(std::vector<uint8_t> *rotations) const {
+  int res = MetadataCommon::VectorTagValue(*metadata_,
+                                      ANDROID_SCALER_AVAILABLE_ROTATE_AND_CROP_MODES,
+                                      rotations);
+
+  if (res) {
+    ALOGE("%s: Failed to get available stream rotation from static metadata.",
+          __func__);
+    return res;
+  }
 
   return 0;
 }

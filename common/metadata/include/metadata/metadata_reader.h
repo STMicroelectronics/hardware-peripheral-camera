@@ -64,6 +64,8 @@ class MetadataReader {
   virtual int MaxOutputStreams(int32_t* max_raw_output_streams,
                                int32_t* max_non_stalling_output_streams,
                                int32_t* max_stalling_output_streams) const;
+  virtual int AvailableUseCases(std::vector<int64_t> *use_cases) const;
+  virtual int AvailableRotation(std::vector<uint8_t> *rotations) const;
   virtual int RequestCapabilities(std::set<uint8_t>* capabilites) const;
   virtual int StreamConfigurations(
       std::vector<StreamConfiguration>* configs) const;

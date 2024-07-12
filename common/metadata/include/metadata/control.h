@@ -168,7 +168,13 @@ bool Control<T>::SupportsRequestValues(
               __FUNCTION__, delegate_->tag());
     return true;
   }
-  return options_->IsSupported(requested);
+  bool ret = options_->IsSupported(requested);
+  if (!ret) {
+    const char *name = get_camera_metadata_tag_name(delegate_->tag());
+    ALOGE("%s: value not supported for %s", __func__, name ? name : "invalid");
+  }
+
+  return ret;
 }
 
 template <typename T>

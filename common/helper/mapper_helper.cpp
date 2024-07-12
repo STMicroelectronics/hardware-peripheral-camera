@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.common@1.0-helper.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-helper.stm32mpu"
 // #define LOG_NDEBUG 0
 
 #include <utils/Log.h>
@@ -62,7 +62,7 @@ bool MapperHelper::importBuffer(buffer_handle_t& handle) {
     return true;
   }
 
-  Mutex::Autolock lock(mLock);
+  std::lock_guard lock(mLock);
   if (!initialized__) {
      initializeLocked();
   }
@@ -101,7 +101,7 @@ void MapperHelper::freeBuffer(buffer_handle_t handle) {
       return;
   }
 
-  Mutex::Autolock lock(mLock);
+  std::lock_guard lock(mLock);
 
   if (mapper_ == nullptr) {
       ALOGE("%s: mapper_ is null!", __FUNCTION__);
@@ -141,7 +141,7 @@ void MapperHelper::closeFence(int fd) const {
 
 void* MapperHelper::lock(buffer_handle_t& buf, uint64_t usage, uint32_t width,
                          uint32_t height, hidl_handle& acquire_fence) {
-  Mutex::Autolock lock(mLock);
+  std::lock_guard lock(mLock);
   IMapper::Rect region { 0, 0, static_cast<int>(width),
                                                     static_cast<int>(height) };
   void *ret = 0;
@@ -174,7 +174,7 @@ void* MapperHelper::lock(buffer_handle_t& buf, uint64_t usage, uint32_t width,
 YCbCrLayout MapperHelper::lockYCbCr(buffer_handle_t& buf, uint64_t usage,
                                     uint32_t width, uint32_t height,
                                     hidl_handle& acquire_fence) {
-  Mutex::Autolock lock(mLock);
+  std::lock_guard lock(mLock);
   IMapper::Rect region { 0, 0, static_cast<int>(width),
                                                     static_cast<int>(height) };
   YCbCrLayout layout = {};

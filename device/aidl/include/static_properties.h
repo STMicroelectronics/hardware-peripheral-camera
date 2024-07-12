@@ -18,10 +18,14 @@
 #ifndef DEFAULT_CAMERA_HAL_STATIC_PROPERTIES_H_
 #define DEFAULT_CAMERA_HAL_STATIC_PROPERTIES_H_
 
+#include <aidl/android/hardware/camera/device/StreamConfiguration.h>
+#include <aidl/android/hardware/camera/device/RequestTemplate.h>
+#include <aidl/android/hardware/camera/device/Stream.h>
+#include <aidl/android/hardware/graphics/common/PixelFormat.h>
+
 #include <memory>
 #include <set>
 
-#include <android/hardware/camera/device/3.2/types.h>
 #include <CameraMetadata.h>
 #include "metadata/metadata_reader.h"
 #include "metadata/types.h"
@@ -30,8 +34,12 @@ namespace android {
 namespace hardware {
 namespace camera {
 namespace device {
-namespace V3_2 {
 namespace implementation {
+
+using aidl::android::hardware::camera::device::StreamConfiguration;
+using aidl::android::hardware::camera::device::RequestTemplate;
+using aidl::android::hardware::camera::device::Stream;
+using aidl::android::hardware::graphics::common::PixelFormat;
 
 using ::android::hardware::camera::common::V1_0::metadata::MetadataReader;
 using ::android::hardware::camera::common::V1_0::metadata::ReprocessFormatMap;
@@ -39,8 +47,6 @@ using ::android::hardware::camera::common::V1_0::metadata::StreamSpec;
 
 using CameraMetadataHelper =
               ::android::hardware::camera::common::V1_0::helper::CameraMetadata;
-
-using ::android::hardware::graphics::common::V1_0::PixelFormat;
 
 // StaticProperties provides a wrapper around useful static metadata entries.
 class StaticProperties {
@@ -96,6 +102,8 @@ class StaticProperties {
   StaticProperties(std::unique_ptr<const MetadataReader> metadata_reader,
                    int facing,
                    int orientation,
+                   const std::vector<int64_t> &available_use_cases,
+                   const std::vector<uint8_t> &available_rotations,
                    int32_t max_input_streams,
                    int32_t max_raw_output_streams,
                    int32_t max_non_stalling_output_streams,
@@ -117,6 +125,8 @@ class StaticProperties {
   const std::unique_ptr<const MetadataReader> metadata_reader_;
   const int facing_;
   const int orientation_;
+  const std::vector<int64_t> available_use_cases_;
+  const std::vector<uint8_t> available_rotations_;
   const int32_t max_input_streams_;
   const int32_t max_raw_output_streams_;
   const int32_t max_non_stalling_output_streams_;
@@ -130,7 +140,6 @@ class StaticProperties {
 };
 
 } // namespace implementation
-} // namespace V3_2
 } // namespace device
 } // namespace camera
 } // namespace hardware

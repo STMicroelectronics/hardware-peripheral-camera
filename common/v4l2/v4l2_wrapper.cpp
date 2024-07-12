@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.camera.common@1.0-v4l2.stm32mp1"
+#define LOG_TAG "android.hardware.camera.common@1.0-v4l2.stm32mpu"
 // #define LOG_NDEBUG 0
 
 #include "utils/Log.h"
@@ -70,7 +70,7 @@ const std::string V4L2Wrapper::getDevicePath() const {
 
 int V4L2Wrapper::Connect() {
   ALOGV("%s: enter", __FUNCTION__);
-  Mutex::Autolock lock(connection_lock_);
+  std::lock_guard lock(connection_lock_);
 
   if (Connected()) {
     ALOGV("%s: Camera device %s is already connected.",
@@ -78,6 +78,9 @@ int V4L2Wrapper::Connect() {
     ++connection_count_;
     return 0;
   }
+
+  ALOGV("%s: open camera device %s",
+              __FUNCTION__, device_path_.c_str());
 
   /* Open in nonblocking mode (DQBUF may return EAGAIN). */
   int fd = TEMP_FAILURE_RETRY(open(device_path_.c_str(), O_RDWR | O_NONBLOCK));
@@ -101,25 +104,12 @@ int V4L2Wrapper::Connect() {
   // by disabling cameras that get disconnected and checking newly connected
   // cameras, so Connect() is never called on an unsupported camera)
 
-  /* Set camera frame rate to 15fps to ensure preview stability */
-  v4l2_streamparm parm;
-  memset(&parm, 0, sizeof(parm));
-
-  parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  parm.parm.capture.timeperframe.numerator = 1000;
-  parm.parm.capture.timeperframe.denominator =
-    static_cast<uint32_t>(15 * parm.parm.capture.timeperframe.numerator);
-
-  if (ioctlLocked(VIDIOC_S_PARM, &parm) < 0) {
-    ALOGE("%s: S_PARM fails: %s", __FUNCTION__, strerror(errno));
-  }
-
   return 0;
 }
 
 void V4L2Wrapper::Disconnect() {
   ALOGV("%s: enter", __FUNCTION__);
-  Mutex::Autolock lock(connection_lock_);
+  std::lock_guard lock(connection_lock_);
 
   if (connection_count_ == 0) {
     // Not connected.
@@ -143,7 +133,7 @@ void V4L2Wrapper::Disconnect() {
 template <typename T>
 int V4L2Wrapper::ioctlLocked(int request, T data) {
   /* Potentially called so many times logging entry is a bad idea. */
-  Mutex::Autolock lock(device_lock_);
+  std::lock_guard lock(device_lock_);
 
   if (!Connected()) {
     ALOGE("%s: Device %s not connected.", __FUNCTION__, device_path_.c_str());
@@ -422,12 +412,12 @@ int V4L2Wrapper::GetFormatFrameSizes(uint32_t v4l2_format,
 
       if (desired_width < size_query.stepwise.min_width ||
           desired_height < size_query.stepwise.min_height) {
-        ALOGV("%s: Standard size %u x %u is too small for format %d",
+        ALOGV("%s: Standard size %u x %u is too small for format 0x%x",
                   __FUNCTION__, desired_width, desired_height, v4l2_format);
         continue;
       } else if (desired_width > size_query.stepwise.max_width ||
                  desired_height > size_query.stepwise.max_height) {
-        ALOGV("%s: Standard size %u x %u is too big for format %d",
+        ALOGV("%s: Standard size %u x %u is too big for format 0x%x",
                   __FUNCTION__, desired_width, desired_height, v4l2_format);
         continue;
       }
@@ -459,6 +449,7 @@ int V4L2Wrapper::GetFormatFrameDurationRange(
     uint32_t v4l2_format,
     const std::array<int32_t, 2>& size,
     std::array<int64_t, 2>* duration_range) {
+
   v4l2_frmivalenum duration_query;
 
   memset(&duration_query, 0, sizeof(duration_query));
