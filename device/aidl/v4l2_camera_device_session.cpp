@@ -24,7 +24,7 @@
 
 #include <v4l2/stream_format.h>
 
-#include <isp.h>
+#include <dcmipp-isp-ctrl.h>
 
 namespace android {
 namespace hardware {
@@ -827,10 +827,7 @@ ScopedAStatus V4l2CameraDeviceSession::switchToOffline(
 void V4l2CameraDeviceSession::ISPThread() {
   ALOGI("%s: ISP Thread started", __func__);
 
-  static struct isp_descriptor isp_desc = {
-    .isp_fd = -1,
-    .stat_fd = -1,
-  };
+  static struct isp_descriptor isp_desc;
   int ret;
 
   ret = discover_dcmipp(&isp_desc);
@@ -844,9 +841,14 @@ void V4l2CameraDeviceSession::ISPThread() {
 
   std::unique_lock<std::mutex> lock(isp_mutex_);
   while (!closed_) {
-    ret = set_white_balance(&isp_desc);
+    ret = set_profile(&isp_desc, 0);
     if (ret) {
-      ALOGE("%s: failed to execute ISP set_white_balance function (error %d)", __func__, ret);
+      ALOGE("%s: failed to execute ISP set_profile function (error %d)", __func__, ret);
+    }
+
+    ret = set_sensor_gain_exposure(&isp_desc, false);
+    if (ret) {
+      ALOGE("%s: failed to execute ISP set_sensor_gain_exposure function (error %d)", __func__, ret);
     }
 
     isp_cond_.wait_for(lock, std::chrono::milliseconds(frequency), [this] { return closed_; });
