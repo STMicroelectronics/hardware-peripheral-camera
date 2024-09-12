@@ -474,10 +474,14 @@ void V4l2Stream::captureRequestThread() {
       cb_->processCaptureBufferResult(tsb);
     }
 
-    if (tsb.acquire_fence)
+    if (tsb.acquire_fence) {
+      native_handle_close(tsb.acquire_fence);
       native_handle_delete(tsb.acquire_fence);
-    if (tsb.release_fence)
+    }
+    if (tsb.release_fence) {
+      native_handle_close(tsb.release_fence);
       native_handle_delete(tsb.release_fence);
+    }
   }
 
   ALOGI("%s (%s): Capture Result Thread ended", __func__, config_.node);
@@ -555,10 +559,14 @@ void V4l2Stream::flush() {
 
     cb_->processCaptureBufferError(tsb);
 
-    if (tsb.acquire_fence)
+    if (tsb.acquire_fence) {
+      native_handle_close(tsb.acquire_fence);
       native_handle_delete(tsb.acquire_fence);
-    if (tsb.release_fence)
+    }
+    if (tsb.release_fence) {
+      native_handle_close(tsb.release_fence);
       native_handle_delete(tsb.release_fence);
+    }
 
     capture_lock.lock();
   }
