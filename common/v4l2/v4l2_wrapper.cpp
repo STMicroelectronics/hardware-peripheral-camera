@@ -32,17 +32,14 @@ namespace V1_0 {
 namespace v4l2 {
 
 const int32_t kStandardSizes[][2] = {
-  {4096, 2160}, // 4KDCI (for USB camera)
-  {3840, 2160}, // 4KUHD (for USB camera)
-  {3280, 2464}, // 8MP
-  {2560, 1440}, // QHD
-  {1920, 1080}, // HD1080
-  {1640, 1232}, // 2MP
-  {1280,  720}, // HD
-  {1024,  768}, // XGA
-  { 640,  480}, // VGA
-  { 320,  240}, // QVGA
-  { 176,  144}  // QCIF
+  {2592, 1944}, // MAX (IMX335) (4:3)
+  {1920, 1080}, // 1080p (16:9)
+  {1600, 1200}, // UXGA (4:3)
+  {1280,  960}, // SXGA (4:3)
+  {1280,  720}, // 720p (16:9)
+  {1024,  768}, // XGA (4:3)
+  { 640,  480}, // VGA (4:3)
+  { 320,  240}  // QVGA (4:3)
 };
 
 V4L2Wrapper::V4L2Wrapper(const std::string device_path)
